@@ -1,0 +1,31 @@
+@media (min-width: 1400px)
+.container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl {
+    max-width: 1320px;
+}
+
+#chatId {
+	width: 158px;
+	height: 24px;
+	border: 1px solid #AAAAAA;
+	background-color: #EEEEEE;
+}
+
+.targetMsg {
+	margin-bottom: 5px;
+	color: #616264;
+	background-color: #fdfdfe;
+	border-color: #fbfcfd;
+    margin-left: 20px;
+    display: inline-block;
+	text-align: left;
+}
+
+.myMsg {
+	color: #616264;
+    background-color: #fdfdfe;
+    border-color: #fbfcfd;
+    margin-right: 20px;
+    text-align: right;
+    display: inline-block;
+    float: right;
+}

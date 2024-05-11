@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="boardComment">
+
+<!--  댓글 저장-->
+   <insert id="insertComment"  parameterClass="boardCommentVO">
+      insert into board_comment (board_comment_no,
+		board_comment_content,
+		board_comment_level,
+		board_comment_date,
+		mem_no,
+		board_no,
+		board_comment_parents
+		)
+      VALUES(
+	  SEQ_BOARD_COMMENT.NEXTVAL, #board_comment_content#, 0, SYSDATE, #mem_no#, #board_no#, 0)
+   </insert>
+   
+   <insert id="insertReComment"  parameterClass="boardCommentVO">
+      insert into board_comment (board_comment_no,
+		board_comment_content,
+		board_comment_level,
+		board_comment_date,
+		mem_no,
+		board_no,
+		board_comment_parents
+		)
+      VALUES(
+	  SEQ_BOARD_COMMENT.NEXTVAL, #board_comment_content#, 1, SYSDATE, #mem_no#, #board_no#, #board_comment_parents#)
+   </insert>
+   
+  <!-- 댓글 리스트  --> 
+   <select id="selectComment" parameterClass="int" resultClass="boardCommentVO">
+      select * from board_comment where board_no = #board_no# order by board_comment_no 
+   </select>
+
+
+ <!-- 댓글 수정  -->
+  <update id="updateComment" parameterClass="map">
+      update board_comment set board_comment_content = #board_comment_content#  where board_comment_no = #board_comment_no#
+  </update>
+  
+  <!-- 댓글삭제 -->
+  <delete id="deleteComment" parameterClass="int">
+     delete board_comment where board_comment_no = #board_comment_no#
+  </delete>
+ 
+  <select id="selectReComment" parameterClass="int" resultClass="boardCommentVO">
+    select *
+    from board_comment
+    where board_no = #board_no# 
+    and board_comment_level = 1
+  </select>
+</sqlMap>

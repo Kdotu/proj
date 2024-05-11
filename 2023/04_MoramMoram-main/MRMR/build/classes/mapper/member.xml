@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+	
+<sqlMap namespace="member">
+	<insert id="insertMember" parameterClass="memberVO">
+		insert into mem (mem_no, mem_name, mem_id, mem_pass, mem_regno, mem_email, mem_hp, mem_addr_base, mem_addr_detail, mem_grade)
+		values (seq_mem_no.nextval, #mem_name#, #mem_id#, #mem_pass#, #mem_regno#, #mem_email#, #mem_hp#, #mem_addr_base#, #mem_addr_detail#, 0)
+	</insert>
+	
+	<select id="memberIdCheck" parameterClass="String" resultClass="int">
+		select count(*) from mem where mem_id = #mem_id#
+	</select>
+	
+	<select id="memberLogin" parameterClass="memberVO" resultClass="int">
+		select count(*) from mem where mem_id = #mem_id# and mem_pass = #mem_pass#
+	</select>
+	
+	<select id="memberIdSearch" parameterClass="memberVO" resultClass="String">
+		select mem_id from mem where mem_name = #mem_name# and mem_email = #mem_email#
+	</select>
+	
+	<select id="memberPasswordSearch" parameterClass="memberVO" resultClass="String">
+		select mem_pass from mem where mem_id = #mem_id# and mem_name = #mem_name# and mem_email = #mem_email#
+	</select>
+	
+	<select id="selectMemberInfo" parameterClass="String" resultClass="memberVO">
+		select * from mem where mem_id = #mem_id#
+	</select>
+	
+	<select id="selectExpertInfo" parameterClass="String" resultClass="expertVO">
+		select expert.* from expert, mem 
+		where expert.mem_no = mem.mem_no and 
+		mem.mem_id = #mem_id#
+	</select>
+	
+	<update id="updateMemGrade" parameterClass="Map">
+		update mem set mem_grade = #mem_grade# where mem_no = #mem_no#
+	</update>
+	
+	<update id="updateMember" parameterClass="memberVO">
+		update mem 
+		set mem_pass = #mem_pass#, mem_hp = #mem_hp#,  mem_email = #mem_email#, mem_addr_base = #mem_addr_base#, mem_addr_detail = #mem_addr_detail#
+		where mem_id = #mem_id#
+	</update>
+	
+	<select id="existExpert" parameterClass="int" resultClass="int">
+		select count(*) from expert where mem_no = #mem_no#
+	</select>
+	
+	<sql id="dynamicCondition">
+	 <dynamic prepend="and">
+	     <isNotEmpty property="stype"  prepend=" and ">
+	        <isNotEmpty property="sword">
+	                $stype$  like '%'||#sword#||'%'
+	        </isNotEmpty>
+	     </isNotEmpty>
+	 </dynamic>
+	</sql>
+	
+	<select id="selectMyCart" parameterClass="Map" resultClass="HashMap">
+		SELECT A.*
+	      FROM (SELECT ROWNUM AS RNUM, B.*
+	              FROM (select cart.cart_no as cart_no,
+	                           cart.cart_date as cart_date,
+	                           service.service_name as service_name,
+	                           cart_state.cart_state_name as cart_state_name,
+	                           cart.mem_no as mem_no,
+	                           mem.mem_name as mem_name
+	                           from cart, service, cart_state, mem
+	                          where cart.cart_state_no = cart_state.cart_state_no 
+	                            and cart.service_no = service.service_no 
+	                            and cart.mem_no = mem.mem_no 
+	                            and cart.mem_no = #mem_no#
+	                            <include refid="dynamicCondition"/>
+	                          order by cart_no desc) B
+	   <![CDATA[ WHERE ROWNUM <= #end#) A
+	       WHERE A.RNUM >= #start# ]]>
+	</select>
+
+	<select id="selectMyBoard" parameterClass="map" resultClass="HashMap">
+		SELECT A.* 
+	      FROM (SELECT ROWNUM AS RNUM, B.*
+	              FROM (SELECT C.BOARD_NO AS BOARD_NO,
+                              D.BOARD_CATEGORY_NAME AS BOARD_CATEGORY_NAME,
+                        C.BOARD_CATEGORY_NO AS BOARD_CATEGORY_NO,
+                              C.BOARD_TITLE AS BOARD_TITLE,
+                              C.BOARD_DATE AS BOARD_DATE,
+                              TO_CHAR(SUBSTR(C.BOARD_CONTENT, 0, 10)||'...') AS BOARD_CONTENT,
+                              C.MEM_NO AS MEM_NO
+                           FROM BOARD C, BOARD_CATEGORY D
+                          WHERE C.BOARD_CATEGORY_NO = D.BOARD_CATEGORY_NO 
+                            AND C.MEM_NO = #mem_no#
+	                         <include refid="dynamicCondition"/>
+	                       ORDER BY BOARD_NO DESC) B
+	   <![CDATA[ WHERE ROWNUM <= #end#) A
+	     WHERE A.RNUM >= #start# ]]>
+	</select>
+		
+	<select id="getTotalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(*) FROM $table$ WHERE MEM_NO = #mem_no# <include refid="dynamicCondition"/>
+	</select>
+	
+	<select id="selectWishList" parameterClass="int" resultClass="HashMap">
+		 SELECT MEM_WISHLIST.WISH_NO ,
+				MEM_WISHLIST.MEM_NO ,
+				MEM_WISHLIST.SERVICE_NO,
+				SERVICE.SERVICE_NAME,
+		        TO_CHAR(SERVICE.SERVICE_PRICE,'999,999,999') AS SERVICE_PRICE,
+		        SERVICE.SERVICE_INFO,
+		        SERVICE.SERVICE_NO,
+		        (CASE WHEN SERVICE.SERVICE_APPROVED_NO=1 THEN '승인' ELSE '미승인' END) AS SERVICE_APPROVED,
+		        MEM.MEM_NAME
+		   FROM MEM_WISHLIST, SERVICE, MEM
+		  WHERE MEM_WISHLIST.SERVICE_NO = SERVICE.SERVICE_NO 
+		    AND MEM.MEM_NO = SERVICE.MEM_NO
+		    AND MEM_WISHLIST.MEM_NO = #mem_no#
+	</select>
+	
+	<delete id="deleteWishList" parameterClass="int">
+		delete from mem_wishlist where wish_no = #wish_no#
+	</delete>
+	
+	<select id="selectChat" parameterClass="int" resultClass="HashMap">
+		select
+		distinct chat.mem_no_sender as mem_sender_no,
+		mem_a.mem_name as mem_sender_name,
+		chat.mem_no_target as mem_target_no,
+		mem_b.mem_name as mem_target_name
+		from chat, mem mem_a, mem mem_b
+		where 
+		chat.mem_no_sender = mem_a.mem_no and
+		chat.mem_no_target = mem_b.mem_no and
+		chat.mem_no_sender = #mem_no#
+	</select>
+	
+	<insert id="insertExpert" parameterClass="expertVO">
+		insert into expert(mem_no, expert_career, expert_info, expert_contact, expert_license, expert_education)
+		values(#mem_no#, #expert_career#, #expert_info#, #expert_contact#, #expert_license#, #expert_education#)
+	</insert>
+	
+	<select id="selectExpertServiceHistory" parameterClass="int" resultClass="HashMap">
+		select
+		cart.cart_no as cart_no,
+		service.service_no as service_no,
+		service.service_name as service_name,
+		mem.mem_no as mem_no,
+		mem.mem_name as mem_name,
+		service.service_name as service_name,
+		cart.cart_date as cart_date,
+		service.service_price as service_price,
+		cart_state.cart_state_name as cart_state_name
+		from cart, cart_state, service, mem
+		where 
+		cart.cart_state_no = cart_state.cart_state_no and
+		cart.service_no = service.service_no and
+		cart.mem_no = mem.mem_no and
+		service.mem_no = #mem_no#
+		order by cart_no desc
+	</select>
+	
+	<select id="selectYearSalesStatistics" parameterClass="Map" resultClass="HashMap">
+		select to_char(cart_date, 'YYYY') as statistics_date, sum(service.service_price) as sales_statistics
+		from cart, service
+		where 
+		cart.service_no = service.service_no and
+		to_char(cart_date,'YYYY') = #date# and
+		service.mem_no = #mem_no#
+		group by to_char(cart_date, 'YYYY')
+		order by to_char(cart_date, 'YYYY')
+	</select>
+	
+	<select id="selectMonthSalesStatistics" parameterClass="Map" resultClass="HashMap">
+		select to_char(cart_date, 'MM') as statistics_date, 
+		sum(service.service_price) as sales_statistics
+		from cart, service
+		where 
+		cart.service_no = service.service_no and
+		to_char(cart_date,'YYYY')= #date# and
+		service.mem_no = #mem_no#
+		group by to_char(cart_date, 'MM')
+		order by to_char(cart_date, 'MM')
+	</select>
+	
+	<select id="selectWeekSalesStatistics" parameterClass="Map" resultClass="HashMap">
+		select to_char(cart_date, 'W') as statistics_date, 
+		sum(service.service_price) as sales_statistics
+		from cart, service
+		where 
+		cart.service_no = service.service_no and
+		to_char(cart_date,'YYYY-MM') = #date# and
+		service.mem_no = #mem_no#
+		group by to_char(cart_date, 'W')
+		order by to_char(cart_date, 'W')
+	</select>
+	
+	<select id="selectDaySalesStatistics" parameterClass="Map" resultClass="HashMap">
+		select to_char(cart_date, 'DD') as statistics_date, sum(service.service_price) as sales_statistics
+		from cart, service
+		where 
+		cart.service_no = service.service_no and
+		to_char(cart_date,'YYYY-MM-DD') = #date# and
+		service.mem_no = #mem_no#
+		group by to_char(cart_date, 'DD')
+		order by to_char(cart_date, 'DD')
+	</select>
+	
+	
+<!-- 	<select id="selectReportCategory" resultClass="HashMap"> -->
+<!-- 		select * from report_category_no -->
+<!-- 	</select> -->
+	
+<!-- 	<select id="selectReport" parameterClass="int" resultClass="reportVO"> -->
+<!-- 		select * from report where report_category_no = #report_category_no# -->
+<!-- 	</select> -->
+
+	<select id="selectAllReportMember" resultClass="HashMap">
+		select 
+		count(report.mem_no_bad) as report_count,
+		report.mem_no_bad as mem_no_bad,
+		mem.mem_name as mem_name
+		from mem, report
+		where mem.mem_no = report.mem_no_bad
+		group by mem.mem_name, report.mem_no_bad
+	</select>
+	
+	<select id="selectReportMemberDetail" parameterClass="int" resultClass="HashMap">
+		select
+		report.report_no as report_no,
+		report.report_content as report_content,
+		report_category_no.report_category_name as report_category_name,
+		report.mem_no_bad as mem_no_bad
+		from report, report_category_no
+		where
+		report.report_category_no = report_category_no.report_category_no and
+		mem_no_bad = #mem_no#
+	</select>
+	
+	<insert id="insertReport" parameterClass="reportVO">
+		insert into report (report_no, report_date, report_content, report_category_no, mem_no_bad, mem_no_do)
+		    values (seq_report_no.nextval, sysdate, #report_content#, #report_category_no#, #mem_no_bad#, #mem_no_do#)
+	</insert>
+		
+	<select id="selectMemberInfoByNo" parameterClass="Integer" resultClass="memberVO">
+		select * from mem where mem_no = #memberNo#
+	</select>
+	
+</sqlMap>

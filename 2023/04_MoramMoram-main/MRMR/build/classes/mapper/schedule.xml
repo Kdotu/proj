@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+	
+<sqlMap namespace="schedule">
+
+	<!-- 스케쥴정보 불러오기  -->
+	<select id="selectSchedule" parameterClass="int" resultClass="scheduleVO">
+		select schedule_no, schedule_name,to_char(schedule_start,'yyyy-mm-dd') as schedule_start,to_char(schedule_end,'yyyy-mm-dd') as schedule_end
+		 from schedule
+		 where mem_no = #mem_no#
+	</select>
+	
+	<!-- 스케쥴번호 가져오기 -->
+	<select id="selectScheduleNo" parameterClass="scheduleVO" resultClass="int">
+		select schedule_no
+		  from schedule
+		 where schedule_name=#schedule_name#, schedule_start=#schedule_start#,schedule_end=#schedule_end#
+	</select>
+	
+	<!-- 스케쥴 등록하기 -->
+	<insert id="insertSchedule" parameterClass="scheduleVO">
+		insert into Schedule (schedule_no,schedule_name,schedule_start,schedule_end,mem_no)
+		 values (seq_schedule_no.nextval, #schedule_name#,#schedule_start#,#schedule_end#,#mem_no#)
+	</insert>
+	
+	<!-- 스케쥴 수정하기 -->
+	<update id="updateSchedule" parameterClass="scheduleVO">
+		update schedule
+		   set schedule_start = #schedule_start#,
+		   	   schedule_end = #schedule_end#	  
+		 where schedule_no = #schedule_no#
+	</update>
+	
+	
+	<!-- 스케쥴 삭제하기 -->
+	<delete id="deleteSchedule" parameterClass="int">
+		delete from schedule
+		 where schedule_no = #schedule_no# 	
+	</delete>
+	
+
+</sqlMap>

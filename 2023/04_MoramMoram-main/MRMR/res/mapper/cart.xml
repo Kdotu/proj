@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+	
+<sqlMap namespace="cart">
+   <!-- 주문하기  -->
+   <insert id="insertCart" parameterClass="cartVO">
+      insert into cart (cart_no, cart_date, service_no, cart_state_no, mem_no)
+       values (seq_cart_no.nextval, sysdate, #service_no#, 1, #mem_no#)
+   </insert>
+
+   
+   <!-- 주문 상태 변경  -->
+   <update id="updateCartState" parameterClass="Map">
+      update cart
+         set cart_state_no=#cart_state_no#
+       where cart_no = #cart_no#
+   </update>
+
+
+   <!-- 주문 내역 불러오기  -->
+   <select id="selectCartList" parameterClass="Integer" resultClass="cartVO">
+      select *
+       from cart
+       where mem_no = #mem_no#   
+   </select>
+</sqlMap>

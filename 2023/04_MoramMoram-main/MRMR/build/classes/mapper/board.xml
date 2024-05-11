@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="board">
+
+	<!--글 전체보기 -->
+	<sql id="dynamicCondition">
+	 <dynamic prepend="and">
+	     <isNotEmpty property="stype"  prepend=" and ">
+	        <isNotEmpty property="sword">
+	                $stype$  like '%'||#sword#||'%'
+	        </isNotEmpty>
+	     </isNotEmpty>
+	 </dynamic>
+	</sql>
+	<select id="getAllBoardList" parameterClass="map" resultClass="boardVO">
+		SELECT A.* 
+		  FROM (SELECT ROWNUM AS RNUM,
+                       B.* 
+				  from ( select C.BOARD_NO AS BOARD_NO, 
+                                C.BOARD_TITLE AS BOARD_TITLE,
+                                C.BOARD_CONTENT AS BOARD_CONTENT,
+                                C.MEM_NO AS MEM_NO,
+                                D.MEM_NAME AS MEM_NAME, 
+                                C.BOARD_CATEGORY_NO AS BOARD_CATEGORY_NO,
+                                TO_CHAR(C.BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE,
+                                C.BOARD_HIT AS BOARD_HIT 
+				  		   FROM BOARD C, MEM D
+				  		  WHERE C.MEM_NO = D.MEM_NO
+				  		    AND C.BOARD_CATEGORY_NO = #boardCategoryNo#
+				  		    AND C.BOARD_NO != 0
+				  		  <include refid="dynamicCondition"/>
+	       				  ORDER BY C.BOARD_NO DESC ) B 
+       <![CDATA[ WHERE ROWNUM <= #end#) A
+         WHERE A.RNUM >= #start# ]]>
+	</select>
+	
+	<select id="getTotalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(*) FROM BOARD WHERE BOARD_CATEGORY_NO = #boardCategoryNo# <include refid="dynamicCondition"/>
+	</select>
+
+	<!--글 상세보기 -->
+	<select id="getBoard" parameterClass="int" resultClass="boardVO">
+		SELECT A.BOARD_NO, 
+		       A.BOARD_TITLE, 
+		       A.BOARD_CONTENT, 
+		       A.MEM_NO,
+		       B.MEM_NAME, 
+		       A.BOARD_CATEGORY_NO, 
+		       TO_CHAR(A.BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE, 
+		       A.BOARD_HIT
+		  FROM BOARD A, MEM B
+		 WHERE A.MEM_NO = B.MEM_NO
+		   AND BOARD_NO = #board_no#
+	</select>
+
+	<!-- 글 검색 -->
+	<select id="getSearchBoardList" resultClass="boardVO">
+		SELET * FROM BOARD WHERE BOARD_TITLE LIKE ORDER DESC
+	</select>
+
+	<!--글 쓰기 -->
+	<insert id="insertBoard" parameterClass="boardVO">
+		INSERT INTO BOARD
+		(BOARD_NO, BOARD_TITLE, BOARD_CONTENT, MEM_NO, BOARD_CATEGORY_NO,
+		BOARD_DATE)
+		VALUES(SEQ_BOARD_NO.NEXTVAL, #board_title#,
+		#board_content#, #mem_no#, #board_category_no#, SYSDATE)
+		
+		<selectKey keyProperty="board_no" resultClass="int">
+			select max(board_no) from board
+		</selectKey>
+	</insert>
+
+	<!--글 삭제 -->
+	<delete id="deleteBoard" parameterClass="int">
+		DELETE FROM BOARD WHERE
+		BOARD_NO = #board_no#
+	</delete>
+
+	<!--글 수정 -->
+	<update id="updateBoard" parameterClass="boardVO">
+		UPDATE BOARD SET
+		BOARD_TITLE = #board_title#, BOARD_CONTENT = #board_content#
+		WHERE BOARD_NO = #board_no#
+	</update>
+
+	<!-- 조회수 증가 -->
+	<update id="setCountIncrement" parameterClass="int">
+		UPDATE BOARD SET BOARD_HIT = board_hit + 1
+		WHERE board_no = #data#
+	</update>
+	
+</sqlMap>

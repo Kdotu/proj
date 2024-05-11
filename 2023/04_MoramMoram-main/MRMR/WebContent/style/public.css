@@ -1,0 +1,149 @@
+@charset "UTF-8";
+
+.search-bar {
+  width: 200px;
+  height: 27px;
+  border-radius: 5px;
+  border: solid 1px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  opacity: 1;
+  margin-top: 3%;
+  margin-right: 15px;
+}
+.search-bar__input {
+  width: 50px;
+  border: none;
+  -webkit-appearance: none;
+  text-align: center;
+  overflow: auto;
+  z-index: -1;
+  font-size: 15px;
+}
+
+.search-bar__input:focus {
+  outline: none;
+  width: 300px;
+  text-align: left;
+}
+
+.fa-search {
+  font-size: 15px;
+}
+
+/*~맨위 nav*/
+.banner-container{
+  width:1500px;
+  height:400px;
+  overflow:hidden;
+  margin: 0 auto;
+}
+
+.banner{
+  width:1500px;
+  height:400px;
+  display:flex;
+  animation: animation1 10s infinite;
+  /*기본 전환 animation을 위한 설정*/
+  -webkit-transition: all 0.5s cubic-bezier(1, .01, .32, 1);
+  -moz-transition: all 0.5s cubic-bezier(1, .01, .32, 1);
+  -o-transition: all 0.5s cubic-bezier(1, .01, .32, 1);
+  -ms-transition: all 0.5s cubic-bezier(1, .01, .32, 1);
+  transition: all 0.5s cubic-bezier(1, .01, .32, 1);
+}
+.banner>div{
+  width:1500px;
+  height:400px;
+ 
+}
+
+@keyframes animation1 {
+  0% {margin-left: 0}
+  20% {margin-left: 0}
+  25% {margin-left: -100%}
+  45% {margin-left: -100%}
+  50% {margin-left: -200%}
+  70% {margin-left: -200%}
+  75% {margin-left: -300%}
+  95% {margin-left: -300%}
+  100% {margin-left: 0}
+}
+
+@keyframes animation2 {
+  0% {margin-left: -100%}
+  20% {margin-left: -100%}
+  25% {margin-left: -200%}
+  45% {margin-left: -200%}
+  50% {margin-left: -300%}
+  70% {margin-left: -300%}
+  75% {margin-left: 0}
+  95% {margin-left: 0}
+  100% {margin-left: -100%}
+}
+
+@keyframes animation3 {
+  0% {margin-left: -200%}
+  20% {margin-left: -200%}
+  25% {margin-left: -300%}
+  45% {margin-left: -300%}
+  50% {margin-left: 0}
+  70% {margin-left: 0}
+  75% {margin-left: -100%}
+  95% {margin-left: -100%}
+  100% {margin-left: -200%}
+}
+
+@keyframes animation4 {
+  0% {margin-left: -300%}
+  20% {margin-left: -300%}
+  25% {margin-left: 0}
+  45% {margin-left: 0}
+  50% {margin-left: -100%}
+  70% {margin-left: -100%}
+  75% {margin-left: -200%}
+  95% {margin-left: -200%}
+  100% {margin-left: -300%}
+}
+
+/*~배너*/
+#nav{
+	padding-top: 3%;
+}
+
+/*~아이콘*/
+html, body {
+  margin: 0 auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.slider {
+    width: 80%;
+    margin: 50px auto;
+}
+
+.slick-slide {
+  margin: 0px 0px;
+}
+
+.slick-slide img {
+  width: 90%;
+  height: 300px;
+  text-align: center;
+  margin-left: 5%;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: skyblue;
+}
+
+.slick-slide {
+  transition: all ease-in-out .3s;
+}
+    
+/*~두번째 슬라이드*/

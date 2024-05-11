@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="files">
+
+	<insert id="insertFiles" parameterClass="map">
+		INSERT INTO FILES
+		( FILE_NO, FILE_ORIGIN_NAME, FILE_SAVE_NAME, FILE_SIZE, FILE_DATE, MEM_NO, FILE_CATEGORY_NO, $col$ ) VALUES 
+		( SEQ_FILE_NO.NEXTVAL, #file_origin_name#, #file_save_name#, #file_size#, SYSDATE, #mem_no#, #file_category_no#, #no# )
+	</insert>
+	
+	<update id="updateFiles" parameterClass="map">
+		UPDATE FILES SET FILE_ORIGIN_NAME = #file_origin_name#, FILE_SAVE_NAME=#file_save_name# 
+		WHERE MEM_NO = #mem_no# AND FILE_CATEGORY_NO = #file_category_no#
+	</update>
+	
+	<sql id="fileinfo">
+		<dynamic prepend=" and ">
+			<isNotEmpty property="col"  prepend=" and ">
+				<isNotEmpty property="no">
+					$col$ = #no#
+				</isNotEmpty>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<sql id="meminfo">
+		<dynamic prepend=" and ">
+			<isNotEmpty property="memNo"  prepend=" and ">
+				<isNotEmpty property="data">
+					$memNo$ = #data#
+				</isNotEmpty>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="selectFiles" resultClass="filesVO"  parameterClass="map">
+		  SELECT A.FILE_NO, A.FILE_ORIGIN_NAME, A.FILE_SAVE_NAME, A.FILE_SIZE, A.FILE_DATE, 
+   			     A.MEM_NO, A.FILE_CATEGORY_NO, NVL(A.BOARD_NO,0) AS BOARD_NO, 
+                 NVL(A.CHAT_NO,0) AS CHAT_NO, NVL(A.SERVICE_NO,0) AS SERVICE_NO
+		    FROM (SELECT *
+		            FROM FILES 
+		           WHERE 1=1
+		             <include refid="meminfo"/>
+		             AND FILE_CATEGORY_NO = #file_category_no#
+		             <include refid="fileinfo"/>
+		           ORDER BY FILE_DATE DESC ) A
+	   	   WHERE ROWNUM = 1
+	</select>
+		
+	<select id="selectFileCategoty" parameterClass="int" resultClass="String">
+		SELECT FILE_CATEGORY_PATH FROM FILES_CATEGORY WHERE FILE_CATEGORY_NO = #file_category_no# 
+	</select>
+				
+	<select id="searchFile" parameterClass="map" resultClass="int">
+		SELECT COUNT(*) FROM FILES WHERE MEM_NO = #mem_no# AND FILE_CATEGORY_NO = #file_category_no# <include refid="fileinfo"/>
+	</select>
+	
+</sqlMap>

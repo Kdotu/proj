@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>MRMR</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+  
+	<servlet>
+		<servlet-name>BoardController</servlet-name>
+		<servlet-class>board.controller.BoardController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BoardController</servlet-name>
+		<url-pattern>/board/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>MemberController</servlet-name>
+		<servlet-class>member.controller.MemberController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MemberController</servlet-name>
+		<url-pattern>/member/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>ChatController</servlet-name>
+		<servlet-class>chat.controller.ChatController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ChatController</servlet-name>
+		<url-pattern>/chat/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>CartController</servlet-name>
+		<servlet-class>cart.controller.CartController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CartController</servlet-name>
+		<url-pattern>/cart/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>ServiceController</servlet-name>
+		<servlet-class>service.controller.ServiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ServiceController</servlet-name>
+		<url-pattern>/service/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>FileController</servlet-name>
+		<servlet-class>files.controller.FileController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileController</servlet-name>
+		<url-pattern>/files/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+	    <servlet-name>ScheduleController</servlet-name>
+	    <servlet-class>schedule.controller.ScheduleController</servlet-class>
+	  </servlet>
+	  <servlet-mapping>
+	    <servlet-name>ScheduleController</servlet-name>
+	    <url-pattern>/schedule/*</url-pattern>
+	  </servlet-mapping>
+	  
+	  	<servlet>
+	    <servlet-name>AdminController</servlet-name>
+	    <servlet-class>admin.controller.AdminController</servlet-class>
+	  </servlet>
+	  <servlet-mapping>
+	    <servlet-name>AdminController</servlet-name>
+	    <url-pattern>/admin/*</url-pattern>
+	  </servlet-mapping>
+	
+  
+</web-app>

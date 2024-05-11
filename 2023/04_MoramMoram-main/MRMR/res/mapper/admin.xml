@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="admin">
+	<sql id="dynamicCondition">
+		<dynamic prepend="and">
+		    <isNotEmpty property="stype"  prepend=" and ">
+		       <isNotEmpty property="sword">
+		               $stype$  like '%'||#sword#||'%'
+		       </isNotEmpty>
+		    </isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="serviceApprovedlist" resultClass="HashMap">
+	    select a.* ,b.service_category_sub_name
+			  from service a, service_category_sub b
+		where a.service_category_sub_no =b.service_category_sub_no  and 
+	  		  a.service_approved_no = 0 
+        order by service_no desc
+	</select>
+	
+	<update id="serviceApproved" parameterClass="int">
+		update service
+	 	set service_approved_no = 1,
+	 	    service_approved_date = sysdate
+	  	where service_no = #int#
+	</update>
+	
+	<select id="selectMemberlist" parameterClass="map" resultClass="HashMap">
+		SELECT A.*
+	  	  FROM (SELECT ROWNUM AS RNUM, B.*
+		          FROM (SELECT COUNT(REPORT.MEM_NO_BAD) AS REPORT_COUNT,
+							   MEM.MEM_NO, 
+				               MEM.MEM_NAME,
+				               MEM.MEM_ID,
+				               MEM.MEM_EMAIL,
+				               (CASE WHEN MEM.MEM_GRADE=1 THEN '전문가'
+                                     WHEN MEM.MEM_GRADE=22 THEN '블랙리스트'
+                                     WHEN MEM.MEM_GRADE=9 THEN '관리자'
+                                     ELSE '일반회원' END) AS MEM_GRADE,
+				               MEM.MEM_HP
+						  FROM MEM LEFT OUTER JOIN REPORT ON MEM.MEM_NO = REPORT.MEM_NO_BAD
+						 WHERE MEM.MEM_NO != 25 
+                         group by MEM.MEM_NO, MEM.MEM_NAME, MEM.MEM_ID, MEM.MEM_EMAIL, (CASE WHEN MEM.MEM_GRADE=1 THEN '전문가' 
+                         WHEN MEM.MEM_GRADE=22 THEN '블랙리스트' WHEN MEM.MEM_GRADE=9 THEN '관리자' ELSE '일반회원' END), MEM.MEM_HP) B
+       <![CDATA[ WHERE ROWNUM <= #end#) A
+         WHERE A.RNUM >= #start# ]]>
+	</select>
+	
+	<select id="getTotalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(*) FROM MEM WHERE 1=1 <include refid="dynamicCondition"/>
+	</select>
+	
+	<update id="memGradeChange" parameterClass="int">
+		UPDATE MEM SET MEM_GRADE = 22 WHERE MEM_NO = #INT#
+	</update>
+	
+	<select id="serviceApprovedConfirmlist" resultClass="HashMap">
+	    select a.*, b.service_category_sub_name
+        from service a, service_category_sub b
+        where a.service_category_sub_no = b.service_category_sub_no and
+          	  service_approved_no = 1 
+        order by service_approved_date desc
+	</select>
+	
+	
+	<select id="selectReportCount" resultClass="HashMap">
+		select count(report.mem_no_bad) as report_count,
+			   report.mem_no_bad as mem_no_bad,
+			   mem.mem_name as mem_name
+		  from mem, report
+		 where mem.mem_no = report.mem_no_bad
+		 group by mem.mem_name, report.mem_no_bad
+	</select>
+	
+	
+	<select id="selectBadMemInfo" parameterClass="int" resultClass="HashMap">
+        SELECT distinct 
+               A.REPORT_NO_DO AS REPORT_NO,
+               A.REPORT_CONTENT AS REPORT_CONTENT,
+               REPORT_CATEGORY_NO.REPORT_CATEGORY_NAME AS REPORT_CATEGORY_NAME,
+               A.MEM_NO_DO,
+               A.MEM_NAME_DO,
+               B.MEM_NO_BAD,
+               B. MEM_NAME_BAD,
+               A.REPORT_DATE
+        FROM REPORT, REPORT_CATEGORY_NO,
+        
+          (SELECT MEM.MEM_NO AS MEM_NO_DO,
+                  MEM.MEM_NAME AS MEM_NAME_DO, 
+                  REPORT.REPORT_CONTENT AS REPORT_CONTENT,
+                  REPORT.REPORT_NO AS REPORT_NO_DO,
+                  REPORT.REPORT_CATEGORY_NO AS REPORT_CATEGORY_NO,
+                  REPORT.REPORT_DATE AS REPORT_DATE
+            FROM MEM, REPORT 
+             WHERE MEM.MEM_NO=REPORT.MEM_NO_DO ) A,
+             
+           (SELECT MEM.MEM_NO AS MEM_NO_BAD,
+                   MEM.MEM_NAME AS MEM_NAME_BAD,
+                   REPORT.REPORT_NO AS REPORT_NO_BAD
+               FROM MEM, REPORT 
+              WHERE MEM.MEM_NO=REPORT.MEM_NO_BAD 
+                AND REPORT.MEM_NO_BAD = #mem_no_bad#) B
+          WHERE REPORT.REPORT_CATEGORY_NO = REPORT_CATEGORY_NO.REPORT_CATEGORY_NO
+            and A.REPORT_NO_DO = B.REPORT_NO_BAD
+            AND A.REPORT_CATEGORY_NO = REPORT_CATEGORY_NO.REPORT_CATEGORY_NO
+        ORDER BY REPORT_NO DESC
+              
+        
+	</select>
+	
+	<select id="selectAllBadMemInfo" resultClass="HashMap">
+          SELECT distinct 
+               A.REPORT_NO_DO AS REPORT_NO,
+               A.REPORT_CONTENT AS REPORT_CONTENT,
+               REPORT_CATEGORY_NO.REPORT_CATEGORY_NAME AS REPORT_CATEGORY_NAME,
+               A.MEM_NO_DO,
+               A.MEM_NAME_DO,
+               B.MEM_NO_BAD,
+               B. MEM_NAME_BAD,
+               A.REPORT_DATE
+        FROM REPORT, REPORT_CATEGORY_NO,
+        
+          (SELECT MEM.MEM_NO AS MEM_NO_DO,
+                  MEM.MEM_NAME AS MEM_NAME_DO, 
+                  REPORT.REPORT_CONTENT AS REPORT_CONTENT,
+                  REPORT.REPORT_NO AS REPORT_NO_DO,
+                  REPORT.REPORT_CATEGORY_NO AS REPORT_CATEGORY_NO,
+                  REPORT.REPORT_DATE AS REPORT_DATE
+            FROM MEM, REPORT 
+             WHERE MEM.MEM_NO=REPORT.MEM_NO_DO ) A,
+             
+           (SELECT MEM.MEM_NO AS MEM_NO_BAD,
+                   MEM.MEM_NAME AS MEM_NAME_BAD,
+                   REPORT.REPORT_NO AS REPORT_NO_BAD
+              FROM MEM, REPORT 
+             WHERE MEM.MEM_NO=REPORT.MEM_NO_BAD ) B
+          WHERE REPORT.REPORT_CATEGORY_NO = REPORT_CATEGORY_NO.REPORT_CATEGORY_NO
+            and A.REPORT_NO_DO = B.REPORT_NO_BAD
+            AND A.REPORT_CATEGORY_NO = REPORT_CATEGORY_NO.REPORT_CATEGORY_NO
+        ORDER BY REPORT_NO DESC
+	</select>
+
+	<select id="selectCartList" resultClass="HashMap">
+		SELECT C.CART_NO AS CART_NO,
+		       M.MEM_NO AS MEM_NO,
+		       M.MEM_NAME AS MEM_NAME,
+		       S.SERVICE_NO AS SERVICE_NO,
+		       S.SERVICE_NAME AS SERVICE_NAME, 
+		       S.SERVICE_PRICE AS SERVICE_PRICE,
+		       C.CART_DATE AS CART_DATE
+		 FROM CART C, MEM M, SERVICE S
+		WHERE C.MEM_NO = M.MEM_NO
+		  AND C.SERVICE_NO = S.SERVICE_NO
+		   <include refid="dynamicCondition"/>
+	  	 ORDER BY CART_NO DESC
+	</select>
+	
+	<select id="selectCategoryList" resultClass="HashMap">
+		SELECT A.SERVICE_CATEGORY_MAIN_NO AS MAIN_NO,
+		       A.SERVICE_CATEGORY_MAIN_NAME AS MAIN_NAME,
+		       B.SERVICE_CATEGORY_SUB_NO AS SUB_NO,
+		       B.SERVICE_CATEGORY_SUB_NAME AS SUB_NAME
+		  FROM SERVICE_CATEGORY_MAIN A, SERVICE_CATEGORY_SUB B
+		 WHERE A.SERVICE_CATEGORY_MAIN_NO = B.SERVICE_CATEGORY_MAIN_NO
+	</select>
+	
+	<insert id="insertMainCategoryList" parameterClass="String">
+		INSERT INTO SERVICE_CATEGORY_MAIN (SERVICE_CATEGORY_MAIN_NO,SERVICE_CATEGORY_MAIN_NAME)
+		VALUES (SEQ_SERVICE_CATEGORY_MAIN_NO.NEXTVAL, #categoryName#)
+	</insert>
+	
+	<insert id="insertSubCategoryList" parameterClass="ServiceCategorySubVO">
+		INSERT INTO SERVICE_CATEGORY_SUB(SERVICE_CATEGORY_SUB_NO,SERVICE_CATEGORY_SUB_NAME,SERVICE_CATEGORY_MAIN_NO)
+		VALUES (SEQ_SERVICE_CATEGORY_SUB_NO.NEXTVAL, #service_category_sub_name#,#service_category_main_no#)
+	</insert>
+	
+	
+</sqlMap>

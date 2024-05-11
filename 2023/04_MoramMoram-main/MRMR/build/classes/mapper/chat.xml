@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+	
+<sqlMap namespace="chat">
+
+	<select id="getChat" parameterClass="map" resultClass="ChatVO">
+		SELECT * FROM CHAT 
+		WHERE (MEM_NO_SENDER = #chatNo# AND MEM_NO_TARGET = #target#) OR
+			  (MEM_NO_SENDER = #target# AND MEM_NO_TARGET = #chatNo#)
+		ORDER BY CHAT_NO
+	</select>
+	
+	<select id="getTargetList" parameterClass="int" resultClass="ChatVO">
+		select distinct chat.mem_no_sender as mem_no_sender,
+			   mem_a.mem_name as mem_sender_name,
+			   chat.mem_no_target as mem_no_target,
+			   mem_b.mem_name as mem_target_name
+		  from chat, mem mem_a, mem mem_b
+		where chat.mem_no_sender = mem_a.mem_no and
+			  chat.mem_no_target = mem_b.mem_no and
+			  (chat.mem_no_sender = #int# or chat.mem_no_target = #int# ) and
+			  (chat.mem_no_sender != chat.mem_no_target)
+			  order by mem_no_sender
+	</select>
+	
+	<insert id="sendChat" parameterClass="ChatVO">
+		INSERT INTO CHAT ( CHAT_NO, CHAT_CONTENT, CHAT_SENDDATE, MEM_NO_SENDER, MEM_NO_TARGET ) 
+		VALUES ( (SELECT (NVL(MAX(CHAT_NO), 0)) FROM CHAT)+1, #chat_content#, SYSDATE, #mem_no_sender#, #mem_no_target#)
+	</insert>
+	
+</sqlMap>

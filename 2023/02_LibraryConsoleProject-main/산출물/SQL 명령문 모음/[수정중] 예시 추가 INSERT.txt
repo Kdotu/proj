@@ -1,0 +1,36 @@
+
+COMMIT;
+
+-- 공지 게시판
+INSERT INTO POST VALUES (SEQ_BOARDNUM.NEXTVAL, '글제목', '글내용', 게시날짜, admin,1)
+    
+INSERT INTO POST VALUES (SEQ_BOARDNUM.NEXTVAL, '공지사항insert test', '공지사항테스트', SYSDATE, 47,1)
+  
+
+  
+-- 문의 게시판
+INSERT INTO POST VALUES (SEQ_BOARDNUM.NEXTVAL, '문의게시판 insert test', '문의게시판 테스트', SYSDATE, 13,2)
+        
+  
+-- 자유 게시판
+INSERT INTO POST VALUES (SEQ_BOARDNUM.NEXTVAL, '자유게시판 insert test', '자유게시판 테스트', SYSDATE, 13,3)  
+
+
+
+-- 댓글
+
+INSERT INTO COMENT VALUES (SEQ_COMENT_NUM.NEXTVAL, '댓글내용테스트',SYSDATE, 47,443 )
+
+
+
+
+
+
+
+
+
+--회원
+INSERT INTO MEMBER VALUES (SEQ_MEM_NUM,'아이디','패스워드','이름','성별',연락처,'주소', '이메일주소')
+
+-- 회원도서
+ISERT INTO MEMBOOK VALUES (SEQ_MEM_NUM,'희망도서명',등록일, 관심도서번호, 회원번호))
